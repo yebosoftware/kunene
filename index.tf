@@ -104,7 +104,7 @@ resource "digitalocean_project" "playground" {
   environment = "Development"
 }
 
-resource "digitalocean_app" "golang-sample-1" {
+resource "digitalocean_app" "golang_sample_1" {
   spec {
     name   = "golang-sample-1"
     region = "ams"
@@ -125,6 +125,6 @@ resource "digitalocean_app" "golang-sample-1" {
 }
 
 output "digital_ocean_app_url" {
-  value       = digitalocean_app.golang-sample-1.url
+  value       = digitalocean_app.golang_sample_1.live_url
   description = "The URL of the DigitalOcean App Platform app"
 }
