@@ -104,9 +104,9 @@ resource "digitalocean_project" "playground" {
   environment = "Development"
 }
 
-resource "digitalocean_app" "golang-sample" {
+resource "digitalocean_app" "golang-sample-1" {
   spec {
-    name   = "golang-sample"
+    name   = "golang-sample-1"
     region = "ams"
 
     service {
