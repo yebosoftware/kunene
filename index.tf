@@ -123,3 +123,8 @@ resource "digitalocean_app" "golang-sample-1" {
 
   project_id = digitalocean_project.playground.id  # Reference the project created earlier
 }
+
+output "digital_ocean_app_url" {
+  value       = digitalocean_app.golang-sample-1.url
+  description = "The URL of the DigitalOcean App Platform app"
+}
