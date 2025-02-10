@@ -71,6 +71,12 @@ variable "digital_ocean_project_description" {
   default     = ""
 }
 
+variable "supabase_build_dir" {
+  description = "Digital ocean project description"
+  type        = string
+  default     = ""
+}
+
 # Providers
 
 provider "digitalocean" {
@@ -137,6 +143,8 @@ resource "null_resource" "supabase_db_migrations" {
   provisioner "local-exec" {
     command = <<EOT
       #!/bin/bash
+      cd $SUPABASE_BUILD_DIR
+      SUPABASE_ACCESS_TOKEN=$SUPABASE_ACCESS_TOKEN npx supabase init --with-vscode-settings --with-intellij-settings
       SUPABASE_ACCESS_TOKEN=$SUPABASE_ACCESS_TOKEN npx supabase link --project-ref $SUPABASE_PROJECT_REF --password $SUPABASE_DATABASE_PASSWORD
       SUPABASE_ACCESS_TOKEN=$SUPABASE_ACCESS_TOKEN npx supabase db push
       SUPABASE_ACCESS_TOKEN=$SUPABASE_ACCESS_TOKEN npx supabase functions deploy --all
@@ -147,6 +155,7 @@ resource "null_resource" "supabase_db_migrations" {
       SUPABASE_ACCESS_TOKEN = var.supabase_access_token
       SUPABASE_PROJECT_REF = supabase_project.test.id
       SUPABASE_DATABASE_PASSWORD = var.supabase_database_password
+      SUPABASE_BUILD_DIR = var.supabase_build_dir
     }
   }
   depends_on = [ data.supabase_apikeys.test_keys ]
