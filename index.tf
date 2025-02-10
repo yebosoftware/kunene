@@ -174,7 +174,7 @@ resource "digitalocean_project" "playground" {
   description = var.digital_ocean_project_description
   purpose     = "Web Application"
   environment = "Development"
-  depends_on = [supabase_project.test]
+  depends_on = [null_resource.supabase_db_migrations]
 }
 
 resource "digitalocean_app" "golang_sample_1" {
