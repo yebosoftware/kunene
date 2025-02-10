@@ -145,8 +145,8 @@ resource "null_resource" "supabase_db_migrations" {
       #!/bin/bash
       cd $SUPABASE_BUILD_DIR
       SUPABASE_ACCESS_TOKEN=$SUPABASE_ACCESS_TOKEN npx supabase link --project-ref $SUPABASE_PROJECT_REF --password $SUPABASE_DATABASE_PASSWORD
-      SUPABASE_ACCESS_TOKEN=$SUPABASE_ACCESS_TOKEN npx supabase db push
-      SUPABASE_ACCESS_TOKEN=$SUPABASE_ACCESS_TOKEN npx supabase functions deploy
+      # SUPABASE_ACCESS_TOKEN=$SUPABASE_ACCESS_TOKEN npx supabase db push
+      # SUPABASE_ACCESS_TOKEN=$SUPABASE_ACCESS_TOKEN npx supabase functions deploy
       exit 0
     EOT
 
