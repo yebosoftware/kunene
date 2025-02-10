@@ -87,6 +87,8 @@ provider "supabase" {
   access_token = var.supabase_access_token
 }
 
+provider "time" {}
+
 # 1. Create a Supabase project
 resource "supabase_project" "test" {
   organization_id   = var.supabase_organization_id
@@ -138,6 +140,12 @@ data "supabase_apikeys" "test_keys" {
   depends_on = [ null_resource.supabase_polling ]
 }
 
+# Sleep
+resource "time_sleep" "wait_1_minute" {
+  create_duration = "120s"
+  depends_on = [ data.supabase_apikeys.test_keys ]
+}
+
 # Supabase cli link to project
 resource "null_resource" "supabase_db_migrations" {
   provisioner "local-exec" {
@@ -145,7 +153,7 @@ resource "null_resource" "supabase_db_migrations" {
       #!/bin/bash
       cd $SUPABASE_BUILD_DIR
       SUPABASE_ACCESS_TOKEN=$SUPABASE_ACCESS_TOKEN npx supabase link --project-ref $SUPABASE_PROJECT_REF --password $SUPABASE_DATABASE_PASSWORD
-      # SUPABASE_ACCESS_TOKEN=$SUPABASE_ACCESS_TOKEN npx supabase db push
+      SUPABASE_ACCESS_TOKEN=$SUPABASE_ACCESS_TOKEN npx supabase db push
       # SUPABASE_ACCESS_TOKEN=$SUPABASE_ACCESS_TOKEN npx supabase functions deploy
       exit 0
     EOT
@@ -157,7 +165,7 @@ resource "null_resource" "supabase_db_migrations" {
       SUPABASE_BUILD_DIR = var.supabase_build_dir
     }
   }
-  depends_on = [ data.supabase_apikeys.test_keys ]
+  depends_on = [ time_sleep.wait_1_minute ]
 }
 
 # Create a DigitalOcean project
