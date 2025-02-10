@@ -132,7 +132,27 @@ data "supabase_apikeys" "test_keys" {
   depends_on = [ null_resource.supabase_polling ]
 }
 
-# 2. Create a DigitalOcean project
+# Supabase cli link to project
+resource "null_resource" "supabase_db_migrations" {
+  provisioner "local-exec" {
+    command = <<EOT
+      #!/bin/bash
+      SUPABASE_ACCESS_TOKEN=$SUPABASE_ACCESS_TOKEN npx supabase link --project-ref $SUPABASE_PROJECT_REF --password $SUPABASE_DATABASE_PASSWORD
+      SUPABASE_ACCESS_TOKEN=$SUPABASE_ACCESS_TOKEN npx supabase db push
+      SUPABASE_ACCESS_TOKEN=$SUPABASE_ACCESS_TOKEN npx supabase functions deploy --all
+      exit 0
+    EOT
+
+    environment = {
+      SUPABASE_ACCESS_TOKEN = var.supabase_access_token
+      SUPABASE_PROJECT_REF = supabase_project.test.id
+      SUPABASE_DATABASE_PASSWORD = var.supabase_database_password
+    }
+  }
+  depends_on = [ data.supabase_apikeys.test_keys ]
+}
+
+# Create a DigitalOcean project
 resource "digitalocean_project" "playground" {
   name        = var.digital_ocean_project_name
   description = var.digital_ocean_project_description
