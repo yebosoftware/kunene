@@ -96,15 +96,54 @@ resource "supabase_project" "test" {
   }
 }
 
+# Need this to keep checking when the resource is ready
+resource "null_resource" "supabase_polling" {
+  provisioner "local-exec" {
+    command = <<EOT
+      #!/bin/bash
+      MAX_RETRIES=10
+      RETRY_DELAY=30 # Delay in seconds
+
+      for i in $(seq 1 $MAX_RETRIES); do
+        STATUS=$(curl -s -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF | jq -r '.status')
+
+        if [[ "$STATUS" == "ACTIVE_HEALTHY" ]]; then
+          echo "Supabase is ready!"
+          exit 0
+        else
+          echo "Supabase not ready. Attempt $i/$MAX_RETRIES..."
+          sleep $RETRY_DELAY
+        fi
+      done
+
+      echo "Max retries reached. Supabase is not ready."
+      exit 0
+    EOT
+
+    environment = {
+      SUPABASE_ACCESS_TOKEN = var.supabase_access_token
+      SUPABASE_PROJECT_REF = supabase_project.test.id
+    }
+  }
+}
+
+data "supabase_apikeys" "test_keys" {
+  project_ref = supabase_project.test.id
+  depends_on = [ null_resource.supabase_polling ]
+}
+
 # 2. Create a DigitalOcean project
 resource "digitalocean_project" "playground" {
   name        = var.digital_ocean_project_name
   description = var.digital_ocean_project_description
   purpose     = "Web Application"
   environment = "Development"
+  depends_on = [supabase_project.test]
 }
 
 resource "digitalocean_app" "golang_sample_1" {
+  project_id = digitalocean_project.playground.id  # Reference the project created earlier
+
   spec {
     name   = "golang-sample-1"
     region = "ams"
@@ -118,10 +157,20 @@ resource "digitalocean_app" "golang_sample_1" {
         repo_clone_url = "https://github.com/digitalocean/sample-golang.git"
         branch         = "main"
       }
+
+      env {
+        key   = "SUPABASE_ANON_KEY"
+        value = data.supabase_apikeys.test_keys.anon_key
+        scope = "RUN_TIME"
+      }
+
+      env {
+        key   = "SUPABASE_SERVICE_ROLE_KEY"
+        value = data.supabase_apikeys.test_keys.service_role_key
+        scope = "RUN_TIME"
+      }
     }
   }
-
-  project_id = digitalocean_project.playground.id  # Reference the project created earlier
 }
 
 output "digital_ocean_app_url" {
