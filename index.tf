@@ -149,7 +149,7 @@ resource "time_sleep" "wait_1_minute" {
 resource "null_resource" "supabase_db_migrations" {
   provisioner "local-exec" {
     command = <<EOT
-      #!/bin/bash
+      echo $SUPABASE_DATABASE_PASSWORD
       cd $SUPABASE_BUILD_DIR
       SUPABASE_ACCESS_TOKEN=$SUPABASE_ACCESS_TOKEN npx supabase link --project-ref $SUPABASE_PROJECT_REF --password $SUPABASE_DATABASE_PASSWORD
       SUPABASE_ACCESS_TOKEN=$SUPABASE_ACCESS_TOKEN npx supabase db push
