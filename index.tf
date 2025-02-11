@@ -114,7 +114,7 @@ resource "null_resource" "supabase_polling" {
       for i in $(seq 1 $MAX_RETRIES); do
         STATUS=$(curl -s -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF | jq -r '.status')
 
-        if [ "$STATUS" == "ACTIVE_HEALTHY" ]; then
+        if [ "$STATUS" = "ACTIVE_HEALTHY" ]; then
           echo "Supabase is ready!"
           exit 0
         else
