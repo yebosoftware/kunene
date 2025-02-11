@@ -108,7 +108,8 @@ resource "supabase_project" "test" {
 resource "null_resource" "supabase_polling" {
   provisioner "local-exec" {
     command = <<EOT
-      #!/bin/bash
+      #!/usr/bin/env bash
+
       MAX_RETRIES=10
       RETRY_DELAY=30 # Delay in seconds
 
